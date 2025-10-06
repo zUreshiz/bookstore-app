@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import User from "./User";
-import Book from "./Book";
+import User from "./User.js";
+import Book from "./Book.js";
 
 const orderSchema = new mongoose.Schema(
   {

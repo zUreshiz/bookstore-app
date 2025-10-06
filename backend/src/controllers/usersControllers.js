@@ -1,23 +1,34 @@
 import User from "../../model/User.js";
 import bcryptjs from "bcryptjs";
 
-export const getAllUser = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (error) {
-    console.log("getAllUser failed: ", error);
+    console.log("getAllUsers failed: ", error);
     res.status(500).json({ message: "System error" });
   }
 };
 
-export const registerUser = async (req, res) => {
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("getUserById failed: ", error);
+    res.status(500).json({ message: "System error" });
+  }
+};
+
+export const createUser = async (req, res) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
 
     //Kiểm tra xem người dùng có tồn tại không
-    const exisUser = await User.findOne({ email });
-    if (exisUser) return res.status(400).json({ message: "User already exists" });
+    const existUser = await User.findOne({ email });
+    if (existUser) return res.status(400).json({ message: "User already exists" });
 
     // Hash password
     const salt = await bcryptjs.genSalt(10);
@@ -30,7 +41,7 @@ export const registerUser = async (req, res) => {
     const { password: _, ...userData } = newUser._doc;
     res.status(201).json(userData);
   } catch (error) {
-    console.log("registerUser failed: ", error);
+    console.log("createUser failed: ", error);
     res.status(500).json({ message: "System error" });
   }
 };
@@ -40,8 +51,8 @@ export const updateUser = async (req, res) => {
     const { name, email, phoneNumber, password } = req.body;
 
     if (email) {
-      const exisUser = await User.findOne({ email });
-      if (exisUser && exisUser._id.toString() !== req.params.id) {
+      const existUser = await User.findOne({ email });
+      if (existUser && existUser._id.toString() !== req.params.id) {
         return res.status(400).json({ message: "User already exists" });
       }
     }
