@@ -1,3 +1,4 @@
+import Book from "../../model/Book.js";
 import Review from "../../model/Review.js";
 
 export const getAllReviews = async (req, res) => {
@@ -9,6 +10,29 @@ export const getAllReviews = async (req, res) => {
     res.status(200).json(reviews);
   } catch (error) {
     console.log("getAllReviews Failed: ", error);
+    res.status(500).json({ message: "System error" });
+  }
+};
+
+export const getReviewsByBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ message: "Book review not found" });
+    }
+    const reviews = await Review.find({ book: id })
+      .populate("user", "name")
+      .populate("book", "title")
+      .sort({ createdAt: -1 });
+
+    if (reviews.length === 0) {
+      return res.status(200).json({ message: `Book ${book.title} has no reviews yet` });
+    }
+
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.log("getReviewsByBook Failed:", error);
     res.status(500).json({ message: "System error" });
   }
 };

@@ -1,5 +1,6 @@
 import User from "../../model/User.js";
 import bcryptjs from "bcryptjs";
+import { validateUserInput } from "../utils/validateUser.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -26,9 +27,12 @@ export const createUser = async (req, res) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
 
+    const errors = validateUserInput(req.body);
+    if (errors.length) return res.status(422).json({ message: errors.join(", ") });
+
     //Kiểm tra xem người dùng có tồn tại không
     const existUser = await User.findOne({ email });
-    if (existUser) return res.status(400).json({ message: "User already exists" });
+    if (existUser) return res.status(409).json({ message: "User already exists" });
 
     // Hash password
     const salt = await bcryptjs.genSalt(10);
@@ -37,7 +41,7 @@ export const createUser = async (req, res) => {
     const user = new User({ name, email, phoneNumber, password: hashedPassword });
     const newUser = await user.save();
 
-    // Xóa password
+    // Xóa password khỏi data trả về
     const { password: _, ...userData } = newUser._doc;
     res.status(201).json(userData);
   } catch (error) {
@@ -50,6 +54,10 @@ export const updateUser = async (req, res) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
 
+    const errors = validateUserInput(req.body, true);
+    if (errors.length) return res.status(422).json({ message: errors.join(", ") });
+
+    // Kiểm tra trùng email
     if (email) {
       const existUser = await User.findOne({ email });
       if (existUser && existUser._id.toString() !== req.params.id) {
@@ -57,8 +65,13 @@ export const updateUser = async (req, res) => {
       }
     }
 
-    // Hash password
     let updateFields = { name, email, phoneNumber };
+
+    Object.keys(updateFields).forEach(
+      (key) => updateFields[key] === undefined && delete updateFields[key]
+    );
+
+    // Hash password
     if (password) {
       const salt = await bcryptjs.genSalt(10);
       updateFields.password = await bcryptjs.hash(password, salt);

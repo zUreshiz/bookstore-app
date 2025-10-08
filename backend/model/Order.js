@@ -22,6 +22,11 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     totalAmount: { type: Number, required: true },
+    paymentMethod: {
+      type: String,
+      enum: ["cod", "credit_card"],
+      default: "code",
+    },
     status: {
       type: String,
       enum: ["pending", "processing", "shipping", "completed", "cancelled"],

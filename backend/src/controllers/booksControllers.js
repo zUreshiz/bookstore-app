@@ -49,13 +49,13 @@ export const deleteBook = async (req, res) => {
 
 export const updateBook = async (req, res) => {
   try {
-    if (Object.keys(filteredData).length === 0) {
-      return res.status(400).json({ message: "No valid fields provided to update" });
-    }
-
     const filteredData = Object.fromEntries(
       Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
     );
+
+    if (Object.keys(filteredData).length === 0) {
+      return res.status(400).json({ message: "No valid fields provided to update" });
+    }
 
     if (filteredData.title) {
       const existBook = await Book.findOne({ title: filteredData.title });

@@ -106,7 +106,7 @@ export const updateOrder = async (req, res) => {
     }
 
     // Hoàn trả số lượng sách từ đơn hàng về lại stock
-    if (status === "canceled") {
+    if (status === "cancelled") {
       for (const item of order.items) {
         const book = await Book.findById(item.book._id);
         if (book) {
