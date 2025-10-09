@@ -1,16 +1,4 @@
-import Book from "../../model/Book.js";
-
-const allowedFields = [
-  "title",
-  "author",
-  "description",
-  "category",
-  "price",
-  "stock",
-  "coverImage",
-  "rating",
-  "publishedDate",
-];
+import Book, { validCategories, allowedFields } from "../../model/Book.js";
 
 export const getAllBooks = async (req, res) => {
   try {
@@ -57,6 +45,10 @@ export const updateBook = async (req, res) => {
       return res.status(400).json({ message: "No valid fields provided to update" });
     }
 
+    if (filteredData.category && !validCategories.includes(filteredData.category)) {
+      return res.status(400).json({ message: "Invalid book category" });
+    }
+
     if (filteredData.title) {
       const existBook = await Book.findOne({ title: filteredData.title });
       if (existBook && existBook._id.toString() !== req.params.id) {
@@ -91,6 +83,13 @@ export const addBook = async (req, res) => {
         return res.status(400).json({ message: "Book title already exists" });
       }
     }
+
+    if (!validCategories.includes(filteredData.category)) {
+      return res.status(400).json({ message: "Invalid book category" });
+    }
+
+    //  lưu lại admin tạo sách:
+    // filteredData.createdBy = req.user?._id;
 
     const book = new Book(filteredData);
     const newBook = await book.save();

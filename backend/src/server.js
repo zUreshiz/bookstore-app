@@ -9,6 +9,9 @@ import reviewsRoutes from "./routes/reviewsRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { validateRequest } from "./middlewares/validateRequest.js";
+
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
@@ -24,6 +27,10 @@ app.use("/api/orders", ordersRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/cart", cartRoutes);
+
+app.use(notFound);
+
+app.use(errorHandler);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

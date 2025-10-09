@@ -7,17 +7,27 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/usersControllers.js";
+import { verifyToken } from "../middlewares/authMiddleware.js";
+import { adminMiddleware } from "../middlewares/adminMiddleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateUserInput } from "../utils/validateUser.js";
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
+router.get("/", verifyToken, adminMiddleware, getAllUsers);
 
-router.get("/:id", getUserById);
+router.get("/:id", verifyToken, getUserById);
 
-router.post("/", createUser);
+router.post(
+  "/",
+  verifyToken,
+  adminMiddleware,
+  validateRequest(validateUserInput),
+  createUser
+);
 
-router.put("/:id", updateUser);
+router.put("/:id", verifyToken, updateUser);
 
-router.delete("/:id", deleteUser);
+router.delete("/:id", verifyToken, adminMiddleware, deleteUser);
 
 export default router;

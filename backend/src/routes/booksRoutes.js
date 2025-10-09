@@ -8,16 +8,19 @@ import {
   addBook,
 } from "../controllers/booksControllers.js";
 
+import { adminMiddleware } from "../middlewares/adminMiddleware.js";
+import { verifyToken } from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
 
-router.get("/", getAllBooks);
+router.get("/", verifyToken, getAllBooks);
 
-router.get("/:id", getBookById);
+router.get("/:id", verifyToken, getBookById);
 
-router.post("/", addBook);
+router.post("/", verifyToken, adminMiddleware, addBook);
 
-router.put("/:id", updateBook);
+router.put("/:id", verifyToken, adminMiddleware, updateBook);
 
-router.delete("/:id", deleteBook);
+router.delete("/:id", verifyToken, adminMiddleware, deleteBook);
 
 export default router;

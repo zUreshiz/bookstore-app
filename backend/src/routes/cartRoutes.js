@@ -5,15 +5,16 @@ import {
   removeFromCart,
   decreaseQuantity,
 } from "../controllers/cartControllers.js";
+import { verifyToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getCart);
+router.get("/", verifyToken, getCart);
 
-router.post("/add", addToCart);
+router.post("/add", verifyToken, addToCart);
 
-router.patch("/decrease/:bookId", decreaseQuantity);
+router.patch("/decrease/:bookId", verifyToken, decreaseQuantity);
 
-router.delete("/remove/:bookId", removeFromCart);
+router.delete("/remove/:bookId", verifyToken, removeFromCart);
 
 export default router;
