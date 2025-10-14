@@ -10,7 +10,8 @@ import usersRoutes from "./routes/usersRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { validateRequest } from "./middlewares/validateRequest.js";
+
+import { notFound } from "./middlewares/notFound.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;

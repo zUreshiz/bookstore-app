@@ -1,16 +1,21 @@
+import validator from "validator";
+
 export const validateUserInput = (data, isUpdate = false) => {
   const errors = [];
+  const missingFields = []; // 👈 thêm dòng này
+
   const { name, email, phoneNumber, password } = data;
 
   // Missing field
   if (!isUpdate) {
-    if (!name) errors.push("name");
-    if (!email) errors.push("email");
-    if (!phoneNumber) errors.push("phoneNumber");
-    if (!password) errors.push("password");
+    if (!name) missingFields.push("name");
+    if (!email) missingFields.push("email");
+    if (!phoneNumber) missingFields.push("phoneNumber");
+    if (!password) missingFields.push("password");
 
-    if (missingFields.length)
+    if (missingFields.length) {
       errors.push(`Missing required field(s): ${missingFields.join(", ")}`);
+    }
   }
 
   // Email

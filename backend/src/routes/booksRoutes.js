@@ -10,6 +10,8 @@ import {
 
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateBookInput } from "../utils/validateBookInput.js";
 
 const router = express.Router();
 
@@ -17,9 +19,21 @@ router.get("/", verifyToken, getAllBooks);
 
 router.get("/:id", verifyToken, getBookById);
 
-router.post("/", verifyToken, adminMiddleware, addBook);
+router.post(
+  "/",
+  verifyToken,
+  adminMiddleware,
+  validateRequest(validateBookInput),
+  addBook
+);
 
-router.put("/:id", verifyToken, adminMiddleware, updateBook);
+router.put(
+  "/:id",
+  verifyToken,
+  adminMiddleware,
+  validateRequest((data) => validateBookInput(data, true)),
+  updateBook
+);
 
 router.delete("/:id", verifyToken, adminMiddleware, deleteBook);
 

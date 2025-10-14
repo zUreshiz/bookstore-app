@@ -17,7 +17,7 @@ router.get("/", verifyToken, adminMiddleware, getAllOrders);
 
 router.get("/:id", verifyToken, getOrderById);
 
-router.get("/user/:userId", verifyToken, adminMiddleware, getOrdersByUser);
+router.get("/user/:userId", verifyToken, getOrdersByUser);
 
 router.delete("/:id", verifyToken, adminMiddleware, deleteOrder);
 

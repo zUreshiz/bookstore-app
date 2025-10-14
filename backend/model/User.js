@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       match: /^[0-9]{10}$/,
     },
     role: { type: String, enum: ["customer", "admin"], default: "customer" },
+    refreshToken: { type: String, default: "" },
   },
   { timestamps: true }
 );
