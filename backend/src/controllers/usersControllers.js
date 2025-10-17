@@ -1,6 +1,7 @@
 import User from "../../model/User.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -121,6 +122,10 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: "Invalid email or password" });
 
+    const isPasswordMatch = await bcryptjs.compare(password, user.password);
+    if (!isPasswordMatch)
+      return res.status(401).json({ message: "Invalid email or password" });
+
     const accessToken = jwt.sign(
       { _id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -183,5 +188,63 @@ export const logoutUser = async (req, res) => {
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     res.status(500).json({ message: "Logout Failed" });
+  }
+};
+
+export const requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_RESET_SECRET, {
+      expiresIn: "10m",
+    });
+
+    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+
+    // Transporter
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.GOOGLE_APP_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Bookstore Support" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset Your Password",
+      html: ` <h2>Reset Your Password</h2>
+      <p>Click the link below to reset your password. The link will expired in 10 minutes.</p>
+      <a href="${resetLink}" target="_blank">Reset Password</a>`,
+    });
+
+    res.status(200).json({ message: "Reset link sent to your email" });
+  } catch (error) {
+    console.log("requestPasswordReset Failed: ", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    const decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const salt = await bcryptjs.genSalt(10);
+    user.password = await bcryptjs.hash(newPassword, salt);
+    await user.save();
+
+    const { password: pw, refreshToken: _, ...userData } = user._doc;
+    res.status(200).json({ message: "Password updated successfully", user: userData });
+  } catch (error) {
+    console.log("resetPassword Failed: ", error);
+    res.status(400).json({ message: "Invalid or expired token" });
   }
 };

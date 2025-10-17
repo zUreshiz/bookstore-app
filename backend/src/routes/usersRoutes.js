@@ -9,6 +9,8 @@ import {
   loginUser,
   refreshToken,
   logoutUser,
+  requestPasswordReset,
+  resetPassword,
 } from "../controllers/usersControllers.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
@@ -37,5 +39,7 @@ router.post("/login", loginUser);
 router.post("/register", validateRequest(validateUserInput), createUser);
 router.post("/refresh", refreshToken);
 router.post("/logout", logoutUser);
+router.post("/request-reset", requestPasswordReset);
+router.post("/reset-password", resetPassword);
 
 export default router;
