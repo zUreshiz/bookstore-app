@@ -1,21 +1,29 @@
 import React, { useState } from "react";
 import api from "../api/axios";
-import { useSearchParams } from "react-router";
+import { Navigate, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [params] = useSearchParams();
   const token = params.get("token");
+  const [isResetSuccess, setIsResetSuccess] = useState(false);
 
   const handleSubmit = async () => {
     try {
       await api.post("/users/reset-password", { token, newPassword: password });
       toast.success("Password reset successful!");
+      setTimeout(() => {
+        setIsResetSuccess(true);
+      }, 1000);
     } catch (error) {
       toast.error(error.response?.data?.message || "Reset failed");
     }
   };
+
+  if (isResetSuccess) {
+    return <Navigate to="/login" replace={true}></Navigate>;
+  }
 
   return (
     <div className="min-h-screen w-full relative">

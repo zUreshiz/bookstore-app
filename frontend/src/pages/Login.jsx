@@ -26,10 +26,6 @@ const Login = () => {
     }
   };
 
-  const handleSkip = () => {
-    setIsLoginSuccess(true);
-  };
-
   if (isLoginSuccess) {
     return <Navigate to="/" replace={true}></Navigate>;
   }
@@ -97,12 +93,14 @@ const Login = () => {
                     onClick={handleSubmit}>
                     Login
                   </button>
-                  <button
-                    type="button"
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 rounded-lg transition cursor-pointer"
-                    onClick={handleSkip}>
-                    Skip
-                  </button>
+                  <div className="flex items-center">
+                    <label>Or</label>
+                  </div>
+                  <Link
+                    to="/register"
+                    className="text-center flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 rounded-lg transition cursor-pointer">
+                    Register
+                  </Link>
                 </div>
               </div>
             </form>

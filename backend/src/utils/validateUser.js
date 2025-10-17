@@ -2,7 +2,7 @@ import validator from "validator";
 
 export const validateUserInput = (data, isUpdate = false) => {
   const errors = [];
-  const missingFields = []; // 👈 thêm dòng này
+  const missingFields = [];
 
   const { name, email, phoneNumber, password } = data;
 
