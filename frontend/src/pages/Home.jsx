@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import BannerSale from "../components/BannerSale";
 import BookCase from "../components/BookCase";
 import BookCaseSale from "../components/BookCaseSale";
+import BookCarousels from "../components/BookCarousels";
 
 const Home = () => {
   const [bookBuffer, setBookBuffer] = useState([]);
@@ -29,6 +30,7 @@ const Home = () => {
     <>
       <BannerSale />
       <BookCaseSale />
+      <BookCarousels />
       <BookCase />
     </>
   );

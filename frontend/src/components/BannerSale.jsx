@@ -1,7 +1,25 @@
 import React from "react";
 import { Link } from "react-router";
 
+// Import Swiper React components
+import { Swiper, SwiperSlide } from "swiper/react";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/effect-cards";
+import { EffectCards } from "swiper/modules";
+
 const BannerSale = () => {
+  const images = [
+    "banner_sale_1.jpg",
+    "banner_sale_2.jpg",
+    "banner_sale_3.jpg",
+    "banner_sale_4.jpg",
+    "banner_sale_5.jpg",
+    "banner_sale_6.jpg",
+    "banner_sale_7.jpg",
+    "banner_sale_8.jpg",
+  ];
   return (
     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-12 relative overflow-hidden">
       {/* Background Pattern */}
@@ -15,7 +33,7 @@ const BannerSale = () => {
           {/* Left Content */}
           <div className="text-center md:text-left mb-8 md:mb-0 md:w-1/2">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Summer Book Sale
+              Winter Book Sale
             </h2>
             <p className="text-xl text-blue-100 mb-6">
               Up to <span className="font-bold text-yellow-400">50% OFF</span> on selected
@@ -39,25 +57,46 @@ const BannerSale = () => {
           <div className="md:w-1/2 relative">
             <div className="relative">
               {/* Sale Badge */}
-              <div className="absolute -top-4 -right-4 bg-red-500 text-white text-lg font-bold rounded-full w-20 h-20 flex items-center justify-center transform rotate-12 animate-pulse">
+              <div className="absolute -top-4 -right-4 bg-red-500 text-white text-lg font-bold rounded-full w-20 h-20 flex items-center justify-center transform rotate-12 animate-pulse z-20">
                 50% OFF
               </div>
 
               {/* Books Stack Effect */}
-              <div className="relative transform hover:scale-105 transition-transform duration-300">
+              <div className="w-52 h-80 mx-auto md:w-72 md:h-[448px] lg:w-[500px] lg:h-[480px] sm:mt-5">
+                <Swiper
+                  effect={"cards"}
+                  grabCursor={true}
+                  modules={[EffectCards]}
+                  initialSlide={4}
+                  className="mySwiper w-full h-full">
+                  {images.map((src, index) => (
+                    <SwiperSlide
+                      key={index}
+                      className="rounded-lg shadow-xl overflow-hidden">
+                      <img
+                        src={src}
+                        alt={`Banner ${index + 1}`}
+                        className="w-full h-full object-cover scale-110"
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+              {/* <div className="relative transform hover:scale-105 transition-transform duration-300">
+                <div className="absolute top-2 left-2 w-full h-full bg-gray-200 rounded-lg transform rotate-9"></div>
                 <div className="absolute top-2 left-2 w-full h-full bg-gray-200 rounded-lg transform rotate-6"></div>
                 <div className="absolute top-1 left-1 w-full h-full bg-gray-300 rounded-lg transform rotate-3"></div>
                 <img
-                  src="https://placehold.co/400x300"
+                  src="winter_book_sale.png"
                   alt="Featured Books"
                   className="relative z-10 rounded-lg shadow-xl"
                 />
-              </div>
+              </div> */}
 
               {/* Floating Elements */}
-              <div className="absolute -top-6 -left-6 w-12 h-12 bg-yellow-400 rounded-full animate-bounce"></div>
-              <div className="absolute -bottom-4 right-8 w-8 h-8 bg-pink-500 rounded-full animate-bounce delay-100"></div>
-              <div className="absolute top-1/2 -right-4 w-6 h-6 bg-green-400 rounded-full animate-bounce delay-200"></div>
+              <div className="absolute -top-2 -left-6 w-12 h-12 bg-yellow-400 rounded-full animate-bounce z-20"></div>
+              <div className="absolute -bottom-4 right-8 w-12 h-12 bg-pink-500 rounded-full animate-bounce delay-100 z-20"></div>
+              <div className="absolute top-1/2 -right-4 w-6 h-6 bg-green-400 rounded-full animate-bounce delay-200 z-20"></div>
             </div>
           </div>
         </div>
