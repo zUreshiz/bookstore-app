@@ -34,6 +34,10 @@ export const allowedFields = [
   "coverImage",
   "rating",
   "publishedDate",
+  "isOnSale",
+  "salePrice",
+  "discountPercent",
+  "saleEndsAt",
 ];
 
 const bookSchema = new mongoose.Schema(
@@ -51,6 +55,11 @@ const bookSchema = new mongoose.Schema(
     coverImage: { type: String },
     rating: { type: Number, default: 0 },
     publishedDate: { type: Date },
+    reviewCount: { type: Number, default: 0, min: 0 },
+    isOnSale: { type: Boolean, default: false, index: true },
+    salePrice: { type: Number },
+    discountPercent: { type: Number, min: 0, max: 100 },
+    saleEndsAt: { type: Date },
   },
   { timestamps: true }
 );

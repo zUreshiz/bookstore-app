@@ -12,6 +12,10 @@ export const validateBookInput = (data, isUpdate = false) => {
     coverImage,
     rating,
     publishedDate,
+    isOnSale,
+    salePrice,
+    discountPercent,
+    saleEndsAt,
   } = data;
 
   const invalidFields = Object.keys(data).filter((key) => !allowedFields.includes(key));
@@ -49,7 +53,58 @@ export const validateBookInput = (data, isUpdate = false) => {
   if (rating !== undefined && (typeof rating !== "number" || rating < 0)) {
     errors.push("Rating must be a positive number");
   }
-  //   Còn publishDate
+  if (publishedDate && isNaN(Date.parse(publishedDate)))
+    errors.push("publishedDate must be a valid date");
+
+  if (category && !validCategories.includes(category)) {
+    errors.push(`Invalid category: ${category}`);
+  }
+  if (isOnSale !== undefined && typeof isOnSale !== "boolean") {
+    errors.push("isOnSale must be a boolean value");
+  }
+
+  if (isOnSale) {
+    // Nếu đang bật sale → cần có ít nhất salePrice hoặc discountPercent
+    if (salePrice === undefined && discountPercent === undefined) {
+      errors.push("Sale book must include salePrice or discountPercent");
+    }
+
+    if (salePrice !== undefined) {
+      if (typeof salePrice !== "number" || salePrice < 0) {
+        errors.push("salePrice must be a positive number");
+      } else if (price !== undefined && salePrice >= price) {
+        errors.push("salePrice must be lower than the original price");
+      }
+    }
+
+    if (discountPercent !== undefined) {
+      if (
+        typeof discountPercent !== "number" ||
+        discountPercent < 0 ||
+        discountPercent > 100
+      ) {
+        errors.push("discountPercent must be a number between 0 and 100");
+      }
+    }
+
+    if (saleEndsAt !== undefined) {
+      const endDate = new Date(saleEndsAt);
+      if (isNaN(endDate.getTime())) {
+        errors.push("saleEndsAt must be a valid date");
+      } else if (endDate < new Date()) {
+        errors.push("saleEndsAt must be a future date");
+      }
+    }
+  } else {
+    // Nếu isOnSale = false mà vẫn gửi kèm sale fields
+    if (
+      salePrice !== undefined ||
+      discountPercent !== undefined ||
+      saleEndsAt !== undefined
+    ) {
+      errors.push("Sale fields should not be provided when isOnSale is false");
+    }
+  }
 
   return errors;
 };

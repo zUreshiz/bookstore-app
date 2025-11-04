@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Category } from "../lib/data.js";
 import { Link, Navigate } from "react-router";
+import { FaShoppingCart, FaChevronDown, FaBars, FaTimes, FaSearch } from "react-icons/fa";
+import { MdMenuBook } from "react-icons/md";
 
 const Header = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -11,6 +13,7 @@ const Header = () => {
   const [cartItemCount, setCartItemCount] = useState(0);
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = () => {
     sessionStorage.clear();
@@ -43,12 +46,13 @@ const Header = () => {
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-18">
           {/* Left side - Logo and navigation */}
           <div className="flex items-center space-x-8">
             {/* Logo */}
-            <Link to="/" className="text-xl font-bold text-gray-800">
+            <Link to="/" className="text-xl font-bold text-gray-800 flex items-center ">
+              <MdMenuBook className="w-10 h-10 mr-2" />
               BookStore
             </Link>
 
@@ -67,20 +71,11 @@ const Header = () => {
                   onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
                   className="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
                   <span>Category</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
+                  <FaChevronDown
+                    className={`w-5 h-5 mt-[4px] transition-transform ${
                       isCategoryDropdownOpen ? "transform rotate-180" : ""
                     }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  />
                 </button>
 
                 {isCategoryDropdownOpen && (
@@ -175,22 +170,45 @@ const Header = () => {
             </div>
           </div>
 
+          {/* Center - Search (desktop) */}
+          <div className="hidden md:flex items-center flex-1 justify-center">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim() === "") return;
+                // Redirect to books page with search query
+                window.location.href = `/books?search=${encodeURIComponent(
+                  searchQuery.trim()
+                )}`;
+              }}
+              className="w-full max-w-xl px-4">
+              <label htmlFor="header-search" className="sr-only">
+                Search books
+              </label>
+              <div className="relative">
+                <input
+                  id="header-search"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search books, authors, ISBN..."
+                  className="w-full border border-gray-200 rounded-xl bg-gray-200 pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                />
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+                  <FaSearch className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+
           {/* Right side - Cart and Auth */}
           <div className="hidden md:flex items-center space-x-6">
             {/* Cart */}
             <Link to="/cart" className="text-gray-600 hover:text-gray-900 relative">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
+              <FaShoppingCart className="w-7 h-7" />
               {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}
@@ -205,20 +223,11 @@ const Header = () => {
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                   className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
                   <span>Hi, {user.name}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
+                  <FaChevronDown
+                    className={`w-5 h-5 mt-[4px] transition-transform ${
                       isProfileDropdownOpen ? "transform rotate-180" : ""
                     }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  />
                 </button>
 
                 {/* Profile Dropdown */}
@@ -273,30 +282,8 @@ const Header = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
-              <svg
-                className={`${isMobileMenuOpen ? "hidden" : "block"} h-6 w-6`}
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <svg
-                className={`${isMobileMenuOpen ? "block" : "hidden"} h-6 w-6`}
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <FaBars className={`${isMobileMenuOpen ? "hidden" : "block"} h-6 w-6`} />
+              <FaTimes className={`${isMobileMenuOpen ? "block" : "hidden"} h-6 w-6`} />
             </button>
           </div>
         </div>

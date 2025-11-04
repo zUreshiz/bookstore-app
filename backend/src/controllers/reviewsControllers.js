@@ -42,9 +42,22 @@ export const deleteReview = async (req, res) => {
     const review = await Review.findByIdAndDelete(req.params.id);
     if (!review) {
       return res.status(404).json({ message: "Review not found" });
-    } else {
-      res.status(200).json(review);
     }
+    const bookId = review.book;
+    const remainingReviews = await Review.find({ book: bookId });
+
+    const newReviewCount = remainingReviews.length;
+    const newRating =
+      newReviewCount > 0
+        ? remainingReviews.reduce((sum, r) => sum + r.rating, 0) / newReviewCount
+        : 0;
+
+    await Book.findByIdAndUpdate(bookId, {
+      reviewCount: newReviewCount,
+      rating: newRating.toFixed(2),
+    });
+
+    res.status(200).json({ message: "Review deleted successfully", review });
   } catch (error) {
     console.log("deleteReview Failed: ", error);
     res.status(500).json({ message: "System error" });
@@ -65,6 +78,14 @@ export const createReview = async (req, res) => {
     const review = new Review({ user, book, rating, comment });
     const newReview = await review.save();
     const populatedReview = await newReview.populate("user").populate("book", "title");
+    const allReviews = await Review.find({ book });
+    const newReviewCount = allReviews.length;
+    const newRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / newReviewCount;
+
+    await Book.findByIdAndUpdate(book, {
+      reviewCount: newReviewCount,
+      rating: newRating.toFixed(2),
+    });
     res.status(201).json(populatedReview);
   } catch (error) {
     console.log("createReview Failed: ", error);

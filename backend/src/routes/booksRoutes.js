@@ -6,6 +6,7 @@ import {
   deleteBook,
   updateBook,
   addBook,
+  getBooksSale,
 } from "../controllers/booksControllers.js";
 
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
@@ -16,6 +17,7 @@ import { validateBookInput } from "../utils/validateBookInput.js";
 const router = express.Router();
 
 router.get("/", verifyToken, getAllBooks);
+router.get("/sale", verifyToken, getBooksSale);
 
 router.get("/:id", verifyToken, getBookById);
 

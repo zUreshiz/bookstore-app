@@ -1,11 +1,52 @@
 import Book, { validCategories, allowedFields } from "../../model/Book.js";
 
+const handleSaleFields = (data) => {
+  if (data.isOnSale) {
+    // Nếu bật sale nhưng không có salePrice, tự tính từ discountPercent
+    if (!data.salePrice && data.discountPercent && data.price) {
+      data.salePrice = Number((data.price * (1 - data.discountPercent / 100)).toFixed(2));
+    }
+
+    // Nếu có salePrice nhưng không có discountPercent thì tự tính ngược lại
+    if (data.salePrice && data.price && !data.discountPercent) {
+      data.discountPercent = Number(
+        (((data.price - data.salePrice) / data.price) * 100).toFixed(2)
+      );
+    }
+
+    // Nếu chưa có ngày kết thúc sale → mặc định 7 ngày kể từ hôm nay
+    if (!data.saleEndsAt) {
+      const sevenDaysLater = new Date();
+      sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+      data.saleEndsAt = sevenDaysLater;
+    }
+  } else {
+    // Nếu không bật sale → xóa thông tin sale
+    data.salePrice = undefined;
+    data.discountPercent = undefined;
+    data.saleEndsAt = undefined;
+  }
+
+  return data;
+};
+
 export const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find();
     res.status(200).json(books);
   } catch (error) {
     console.log("getAllBooks Failed: ", error);
+    res.status(500).json({ message: "System error" });
+  }
+};
+
+export const getBooksSale = async (req, res) => {
+  try {
+    const now = new Date();
+    const booksOnSale = await Book.find({ isOnSale: true, saleEndsAt: { $gte: now } });
+    res.status(200).json(booksOnSale);
+  } catch (error) {
+    console.log("getBooksSale Failed: ", error);
     res.status(500).json({ message: "System error" });
   }
 };
@@ -56,6 +97,8 @@ export const updateBook = async (req, res) => {
       }
     }
 
+    handleSaleFields(filteredData);
+
     const updatedBook = await Book.findByIdAndUpdate(req.params.id, filteredData, {
       new: true,
     });
@@ -90,6 +133,8 @@ export const addBook = async (req, res) => {
 
     //  lưu lại admin tạo sách:
     // filteredData.createdBy = req.user?._id;
+
+    handleSaleFields(filteredData);
 
     const book = new Book(filteredData);
     const newBook = await book.save();

@@ -6,8 +6,8 @@ const BannerSale = () => {
     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-12 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute transform -rotate-45 left-0 w-96 h-96 bg-white rounded-full -top-48 -left-48"></div>
-        <div className="absolute transform -rotate-45 right-0 w-96 h-96 bg-white rounded-full -bottom-48 -right-48"></div>
+        <div className="absolute transform -rotate-45 w-96 h-96 bg-white rounded-full -top-48 -left-48"></div>
+        <div className="absolute transform -rotate-45 w-96 h-96 bg-white rounded-full -bottom-48 -right-48"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">

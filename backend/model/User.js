@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
     },
     role: { type: String, enum: ["customer", "admin"], default: "customer" },
     refreshToken: { type: String, default: "" },
+    wishlist: [
+      {
+        book: { type: mongoose.Schema.Types.ObjectId, ref: "Book", required: true },
+        addedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
