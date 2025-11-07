@@ -208,7 +208,7 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-6">
             {/* Cart */}
             <Link to="/cart" className="text-gray-600 hover:text-gray-900 relative">
-              <FaShoppingCart className="w-7 h-7" />
+              <FaShoppingCart className="w-7 h-7 mr-3" />
               {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}

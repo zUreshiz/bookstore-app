@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-cards";
-import { EffectCards } from "swiper/modules";
+import { EffectCards, Autoplay } from "swiper/modules";
 
 const BannerSale = () => {
   const images = [
@@ -57,7 +57,7 @@ const BannerSale = () => {
           <div className="md:w-1/2 relative">
             <div className="relative">
               {/* Sale Badge */}
-              <div className="absolute -top-4 -right-4 bg-red-500 text-white text-lg font-bold rounded-full w-20 h-20 flex items-center justify-center transform rotate-12 animate-pulse z-20">
+              <div className="absolute -top-8 -right-10 bg-red-500 text-white text-2xl font-bold rounded-full w-30 h-30 flex items-center justify-center transform rotate-12 animate-pulse z-20">
                 50% OFF
               </div>
 
@@ -66,8 +66,13 @@ const BannerSale = () => {
                 <Swiper
                   effect={"cards"}
                   grabCursor={true}
-                  modules={[EffectCards]}
+                  modules={[EffectCards, Autoplay]}
                   initialSlide={4}
+                  autoplay={{
+                    delay: 2500,
+                    disableOnInteraction: false,
+                  }}
+                  loop={true}
                   className="mySwiper w-full h-full">
                   {images.map((src, index) => (
                     <SwiperSlide

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaStar, FaStarHalfAlt, FaRegStar, FaHeart, FaRegHeart } from "react-icons/fa";
+import StarRating from "./StarRating";
+import { Category } from "../lib/data";
 
 const BookCaseSale = () => {
   const [books] = useState([
@@ -14,6 +16,7 @@ const BookCaseSale = () => {
       rating: 4,
       reviewCount: 128,
       discount: 50,
+      category: "Fiction",
     },
     {
       id: 2,
@@ -25,6 +28,7 @@ const BookCaseSale = () => {
       rating: 1,
       reviewCount: 245,
       discount: 50,
+      category: "Fiction",
     },
     {
       id: 3,
@@ -36,6 +40,7 @@ const BookCaseSale = () => {
       rating: 4.6,
       reviewCount: 189,
       discount: 50,
+      category: "Fiction",
     },
     {
       id: 4,
@@ -47,24 +52,9 @@ const BookCaseSale = () => {
       rating: 4.7,
       reviewCount: 167,
       discount: 50,
+      category: "Fiction",
     },
   ]);
-
-  const renderStars = (rating) => {
-    const stars = [];
-
-    for (let i = 1; i <= 5; i++) {
-      if (rating >= i) {
-        stars.push(<FaStar key={i} className="text-yellow-400 w-4 h-4" />);
-      } else if (rating >= i - 0.5) {
-        stars.push(<FaStarHalfAlt key={i} className="text-yellow-400 w-4 h-4" />);
-      } else {
-        stars.push(<FaRegStar key={i} className="text-gray-300 w-4 h-4" />);
-      }
-    }
-
-    return stars;
-  };
 
   // local wishlist state (toggle UI). Replace with API calls later.
   const [favorites, setFavorites] = useState([]);
@@ -93,6 +83,11 @@ const BookCaseSale = () => {
           <div
             key={book.id}
             className="group relative bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105">
+            <div className="absolute top-4 left-4 z-10">
+              <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {Category[book.category] || book.category}
+              </div>
+            </div>
             {/* Discount Badge */}
             <div className="absolute top-4 right-4 z-10">
               <div className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
@@ -125,7 +120,9 @@ const BookCaseSale = () => {
 
               {/* Rating */}
               <div className="flex items-center mb-4">
-                <div className="flex mr-2">{renderStars(book.rating)}</div>
+                <div className="flex mr-2">
+                  <StarRating rating={book.rating} />
+                </div>
                 <span className="text-sm text-gray-500">({book.reviewCount})</span>
               </div>
 

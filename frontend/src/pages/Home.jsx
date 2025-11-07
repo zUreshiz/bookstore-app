@@ -5,6 +5,8 @@ import BannerSale from "../components/BannerSale";
 import BookCase from "../components/BookCase";
 import BookCaseSale from "../components/BookCaseSale";
 import BookCarousels from "../components/BookCarousels";
+import BookSlogan from "../components/BookSlogan";
+import NewsletterSignup from "../components/NewsletterSignup";
 
 const Home = () => {
   const [bookBuffer, setBookBuffer] = useState([]);
@@ -30,8 +32,10 @@ const Home = () => {
     <>
       <BannerSale />
       <BookCaseSale />
-      <BookCarousels />
+      <BookSlogan />
       <BookCase />
+      <BookCarousels />
+      <NewsletterSignup />
     </>
   );
 };
