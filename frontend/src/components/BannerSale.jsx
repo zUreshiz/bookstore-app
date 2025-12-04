@@ -19,9 +19,10 @@ const BannerSale = () => {
     "banner_sale_6.jpg",
     "banner_sale_7.jpg",
     "banner_sale_8.jpg",
+    "banner_sale_9.jpg",
   ];
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-12 relative overflow-hidden">
+    <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-12 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute transform -rotate-45 w-96 h-96 bg-white rounded-full -top-48 -left-48"></div>

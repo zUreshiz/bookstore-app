@@ -7,6 +7,8 @@ import {
   updateBook,
   addBook,
   getBooksSale,
+  getTopBooks,
+  getBookByName,
 } from "../controllers/booksControllers.js";
 
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
@@ -16,23 +18,24 @@ import { validateBookInput } from "../utils/validateBookInput.js";
 
 const router = express.Router();
 
-router.get("/", verifyToken, getAllBooks);
-router.get("/sale", verifyToken, getBooksSale);
-
-router.get("/:id", verifyToken, getBookById);
+router.get("/", getAllBooks);
+router.get("/sale", getBooksSale);
+router.get("/top", getTopBooks);
+router.get("/:id", getBookById);
+router.get("/name/:name", getBookByName);
 
 router.post(
   "/",
-  verifyToken,
-  adminMiddleware,
+  // verifyToken,
+  // adminMiddleware,
   validateRequest(validateBookInput),
   addBook
 );
 
 router.put(
   "/:id",
-  verifyToken,
-  adminMiddleware,
+  // verifyToken,
+  // adminMiddleware,
   validateRequest((data) => validateBookInput(data, true)),
   updateBook
 );

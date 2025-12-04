@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import api from "../api/axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router";
+import Loading from "../components/Loading";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -25,6 +26,7 @@ const Register = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <>

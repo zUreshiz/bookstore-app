@@ -24,15 +24,37 @@ const orderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
     paymentMethod: {
       type: String,
-      enum: ["cod", "credit_card"],
-      default: "code",
+      enum: ["cod", "momo", "banking"],
+      default: "cod",
     },
     status: {
       type: String,
       enum: ["pending", "processing", "shipping", "completed", "cancelled"],
       default: "pending",
     },
-    shippingAddress: { type: String, required: true },
+    shippingAddress: {
+      fullName: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      phone: { type: String, required: true },
+      note: { type: String },
+    },
+    paymentResult: {
+      id: { type: String },
+      status: { type: String },
+      update_time: { type: String },
+      email_address: { type: String },
+    },
+
+    isPaid: {
+      type: Boolean,
+      required: true,
+      default: false, // Mặc định chưa thanh toán
+    },
+
+    paidAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

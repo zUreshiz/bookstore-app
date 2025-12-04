@@ -32,7 +32,12 @@ const handleSaleFields = (data) => {
 
 export const getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find();
+    const { category } = req.query;
+    let filter = {};
+    if (category) {
+      filter.category = category;
+    }
+    const books = await Book.find(filter);
     res.status(200).json(books);
   } catch (error) {
     console.log("getAllBooks Failed: ", error);
@@ -86,8 +91,26 @@ export const updateBook = async (req, res) => {
       return res.status(400).json({ message: "No valid fields provided to update" });
     }
 
-    if (filteredData.category && !validCategories.includes(filteredData.category)) {
-      return res.status(400).json({ message: "Invalid book category" });
+    if (filteredData.category) {
+      // Chỉ kiểm tra nếu category được cung cấp
+      if (!Array.isArray(filteredData.category)) {
+        return res.status(400).json({ message: "Category must be an array" });
+      }
+
+      // Nếu gửi mảng rỗng thì cũng là không hợp lệ (nếu bạn muốn cho phép, hãy bỏ check .length)
+      if (filteredData.category.length === 0) {
+        return res.status(400).json({ message: "Category array cannot be empty" });
+      }
+
+      const invalidCats = filteredData.category.filter(
+        (cat) => !validCategories.includes(cat)
+      );
+
+      if (invalidCats.length > 0) {
+        return res
+          .status(400)
+          .json({ message: `Invalid categories: ${invalidCats.join(", ")}` });
+      }
     }
 
     if (filteredData.title) {
@@ -127,8 +150,24 @@ export const addBook = async (req, res) => {
       }
     }
 
-    if (!validCategories.includes(filteredData.category)) {
-      return res.status(400).json({ message: "Invalid book category" });
+    if (
+      !filteredData.category ||
+      !Array.isArray(filteredData.category) ||
+      filteredData.category.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Category is required and must be a non-empty array" });
+    }
+
+    const invalidCats = filteredData.category.filter(
+      (cat) => !validCategories.includes(cat)
+    );
+
+    if (invalidCats.length > 0) {
+      return res
+        .status(400)
+        .json({ message: `Invalid categories: ${invalidCats.join(", ")}` });
     }
 
     //  lưu lại admin tạo sách:
@@ -141,6 +180,41 @@ export const addBook = async (req, res) => {
     res.status(201).json(newBook);
   } catch (error) {
     console.log("addBook Failed: ", error);
+    res.status(500).json({ message: "System error" });
+  }
+};
+
+export const getTopBooks = async (req, res) => {
+  try {
+    const [topSaleBooks, topSoldBooks, newBooks] = await Promise.all([
+      Book.find({ isOnSale: true }).sort({ reviewCount: -1 }).limit(4).exec(),
+      Book.find({ isOnSale: false }).sort({ reviewCount: -1 }).limit(8).exec(),
+      Book.find().sort({ createdAt: -1 }).limit(8).exec(),
+    ]);
+    res.json({ topSaleBooks, topSoldBooks, newBooks });
+  } catch (error) {
+    console.log("getTopBooks Failed: ", error);
+    res.status(500).json({ message: "System error" });
+  }
+};
+
+export const getBookByName = async (req, res) => {
+  try {
+    const bookName = req.params.name;
+
+    const decodedName = decodeURIComponent(bookName);
+
+    const book = await Book.findOne({
+      title: { $regex: new RegExp(`^${decodedName}$`, "i") },
+    });
+
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json(book);
+  } catch (error) {
+    console.log("getBookByName failed: ", error);
     res.status(500).json({ message: "System error" });
   }
 };

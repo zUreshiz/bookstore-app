@@ -6,13 +6,18 @@ export const getMyWishlist = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate({
       path: "wishlist.book",
-      select: "title author coverImage price salePrice isOnSale",
+      select:
+        "title author coverImage price salePrice saleEndsAt isOnSale discountPercent rating reviewCount category",
     });
+
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user.wishlist);
+
+    const wishlistBooks = user.wishlist.map((item) => item.book).filter((book) => book);
+
+    res.json(wishlistBooks);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "System error" });
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

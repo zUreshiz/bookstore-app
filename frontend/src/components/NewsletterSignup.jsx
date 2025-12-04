@@ -51,8 +51,8 @@ const NewsletterSignup = ({
       <div
         className={
           theme === "muted"
-            ? "bg-gradient-to-r from-sky-700 via-indigo-800 to-violet-800 text-white py-12"
-            : "bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12"
+            ? "bg-gradient-to-r from-sky-700 via-blue-800 to-violet-800 text-white py-12"
+            : "bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12"
         }>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div

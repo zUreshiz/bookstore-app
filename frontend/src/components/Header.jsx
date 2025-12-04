@@ -3,20 +3,21 @@ import { Category } from "../lib/data.js";
 import { Link, Navigate } from "react-router";
 import { FaShoppingCart, FaChevronDown, FaBars, FaTimes, FaSearch } from "react-icons/fa";
 import { MdMenuBook } from "react-icons/md";
+import { useCart } from "../hooks/useCart.js";
 
 const Header = () => {
-  const user = JSON.parse(sessionStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"));
+  const { cartCount } = useCart();
   const [isLogoutSuccess, setIsLogoutSuccess] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = () => {
-    sessionStorage.clear();
+    localStorage.clear();
     setTimeout(() => {
       setIsLogoutSuccess(true);
     }, 1000);
@@ -209,9 +210,9 @@ const Header = () => {
             {/* Cart */}
             <Link to="/cart" className="text-gray-600 hover:text-gray-900 relative">
               <FaShoppingCart className="w-7 h-7 mr-3" />
-              {cartItemCount > 0 && (
+              {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
+                  {cartCount}
                 </span>
               )}
             </Link>
@@ -241,7 +242,7 @@ const Header = () => {
                         Your Profile
                       </Link>
                       <Link
-                        to="/orders"
+                        to="/my-orders"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         role="menuitem">
                         Your Orders

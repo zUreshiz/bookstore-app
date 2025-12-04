@@ -3,18 +3,24 @@ import { useState } from "react";
 import api from "../api/axios";
 import { toast } from "react-toastify";
 import { Link, Navigate } from "react-router";
+import Loading from "../components/Loading";
+import { useCart } from "../hooks/useCart";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { fetchCart } = useCart();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const res = await api.post("/users/login", form);
-      sessionStorage.setItem("accessToken", res.data.accessToken);
-      sessionStorage.setItem("refreshToken", res.data.refreshToken);
-      sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      await fetchCart();
       console.log("Login success");
       toast.success("Login successful");
       setTimeout(() => {
@@ -23,11 +29,21 @@ const Login = () => {
       setForm({ email: "", password: "" });
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (isLoginSuccess) {
     return <Navigate to="/" replace={true}></Navigate>;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loading />
+      </div>
+    );
   }
   return (
     <>
@@ -89,8 +105,7 @@ const Login = () => {
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-700 hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg transition cursor-pointer"
-                    onClick={handleSubmit}>
+                    className="flex-1 bg-blue-700 hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg transition cursor-pointer">
                     Login
                   </button>
                   <div className="flex items-center">

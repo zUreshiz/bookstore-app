@@ -38,6 +38,7 @@ export const allowedFields = [
   "salePrice",
   "discountPercent",
   "saleEndsAt",
+  "reviewCount",
 ];
 
 const bookSchema = new mongoose.Schema(
@@ -46,7 +47,8 @@ const bookSchema = new mongoose.Schema(
     author: { type: String, required: true },
     description: { type: String },
     category: {
-      type: String,
+      type: [String],
+      default: [],
       required: true,
       enum: validCategories,
     },
