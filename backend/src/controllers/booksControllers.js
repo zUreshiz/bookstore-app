@@ -32,13 +32,68 @@ const handleSaleFields = (data) => {
 
 export const getAllBooks = async (req, res) => {
   try {
-    const { category } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const { category, minPrice, maxPrice, rating, sort } = req.query;
+
     let filter = {};
+
     if (category) {
-      filter.category = category;
+      const catArray = category.split(",");
+      filter.category = { $in: catArray };
     }
-    const books = await Book.find(filter);
-    res.status(200).json(books);
+
+    // Lọc theo Giá
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // Lọc theo Rating
+    if (rating) {
+      filter.rating = { $gte: Number(rating) };
+    }
+
+    // 3. Xây dựng Sắp xếp (Sort)
+    let sortOption = {};
+    switch (sort) {
+      case "price_asc": // Giá thấp -> cao
+        sortOption.price = 1;
+        break;
+      case "price_desc": // Giá cao -> thấp
+        sortOption.price = -1;
+        break;
+      case "newest": // Mới nhất
+        sortOption.createdAt = -1;
+        break;
+      case "rating": // Đánh giá cao
+        sortOption.rating = -1;
+        break;
+      default: // Mặc định phổ biến nhất (hoặc theo reviewCount)
+        sortOption.reviewCount = -1;
+    }
+
+    // 4. Tính toán Phân trang
+    const skip = (page - 1) * limit;
+
+    // 5. Query Database
+    // Chạy song song: Lấy danh sách sách + Đếm tổng số lượng (để biết có bao nhiêu trang)
+    const [books, totalBooks] = await Promise.all([
+      Book.find(filter).sort(sortOption).skip(skip).limit(limit),
+      Book.countDocuments(filter),
+    ]);
+
+    // 6. Trả về kết quả kèm Metadata phân trang
+    res.status(200).json({
+      data: books,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalBooks / limit),
+        totalItems: totalBooks,
+        limit,
+      },
+    });
   } catch (error) {
     console.log("getAllBooks Failed: ", error);
     res.status(500).json({ message: "System error" });
@@ -47,9 +102,30 @@ export const getAllBooks = async (req, res) => {
 
 export const getBooksSale = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
     const now = new Date();
-    const booksOnSale = await Book.find({ isOnSale: true, saleEndsAt: { $gte: now } });
-    res.status(200).json(booksOnSale);
+
+    const filter = {
+      isOnSale: true,
+      saleEndsAt: { $gte: now },
+    };
+
+    const [booksOnSale, totalBooks] = await Promise.all([
+      Book.find(filter).skip(skip).limit(limit),
+      Book.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      data: booksOnSale,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalBooks / limit),
+        totalItems: totalBooks,
+        limit,
+      },
+    });
   } catch (error) {
     console.log("getBooksSale Failed: ", error);
     res.status(500).json({ message: "System error" });

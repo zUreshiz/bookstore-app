@@ -11,7 +11,8 @@ export const useWishlist = () => {
     setWishlistLoading(true);
     try {
       const res = await api.get("/wishlist");
-      const bookIds = res.data.map((item) => item.book?._id ?? item._id);
+      const list = res.data.data || [];
+      const bookIds = list.map((item) => item.book?._id ?? item._id);
 
       setWishlistIds(bookIds);
     } catch (error) {

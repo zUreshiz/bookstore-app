@@ -4,6 +4,10 @@ import mongoose from "mongoose";
 
 export const getMyWishlist = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
     const user = await User.findById(req.user._id).populate({
       path: "wishlist.book",
       select:
@@ -14,7 +18,20 @@ export const getMyWishlist = async (req, res) => {
 
     const wishlistBooks = user.wishlist.map((item) => item.book).filter((book) => book);
 
-    res.json(wishlistBooks);
+    // Pagination thủ công vì data đã ở memory
+    const totalItems = wishlistBooks.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const paginatedBooks = wishlistBooks.slice(skip, skip + limit);
+
+    res.status(200).json({
+      data: paginatedBooks,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        limit,
+      },
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });

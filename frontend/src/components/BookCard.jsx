@@ -45,7 +45,7 @@ const BookCard = ({ book, isWishlisted, addToCart, onToggleWishlist }) => {
             View Details
           </Link>
         </div>
-        {book.isOnSale && (
+        {book.isOnSale && book.saleEndsAt && new Date(book.saleEndsAt) > new Date() && (
           <div className="absolute bottom-0 left-0 right-0 bg-red-400 bg-opacity-75 text-white text-sm py-2 text-center font-bold z-20">
             Ends in: <CountdownTimer endTime={book.saleEndsAt} />
           </div>

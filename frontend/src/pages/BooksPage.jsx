@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { useWishlist } from "../hooks/useWishlist";
 import { useCart } from "../hooks/useCart";
+import AppPagination from "@/components/AppPagination";
+import { useSearchParams } from "react-router-dom";
 
 const BooksPage = () => {
   const [bookSale, setBookSale] = useState([]);
@@ -13,18 +15,21 @@ const BooksPage = () => {
   const [loading, setLoading] = useState(false);
   const { addToCart } = useCart();
   const { wishlistIds, wishlistLoading, toggleWishlist, isWishlisted } = useWishlist();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const fetchBooks = async () => {
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchBooks = async (page = 1) => {
     try {
       setLoading(true);
-      const [allBooksRes, saleBookRes] = await Promise.all([
-        api.get("/books"),
-        api.get("/books/sale"),
-      ]);
-      setBookBuffer(allBooksRes.data || []);
-      setBookSale(saleBookRes.data || []);
+
+      const res = await api.get(`/books?page=${page}&limit=12`);
+
+      setBookBuffer(res.data.data);
+      setCurrentPage(res.data.pagination.currentPage);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
-      console.log("Error data: ", error);
       toast.error("Error data");
     } finally {
       setLoading(false);
@@ -32,8 +37,26 @@ const BooksPage = () => {
   };
 
   useEffect(() => {
-    fetchBooks();
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: currentPage }, { replace: true });
+
+    // Scroll lên top mượt mà
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    fetchBooks(currentPage);
+  }, [currentPage]);
 
   return (
     <div>
@@ -42,16 +65,23 @@ const BooksPage = () => {
           <Loading />
         </div>
       ) : (
-        <div className="flex">
-          <FilterMenu />
+        <div>
+          <div className="flex">
+            <FilterMenu />
+            <BookCase
+              books={bookBuffer}
+              wishlistIds={wishlistIds}
+              addToCart={addToCart}
+              toggleWishlist={toggleWishlist}
+              isWishlisted={isWishlisted}
+              hideViewAll={true}
+            />
+          </div>
 
-          <BookCase
-            books={bookBuffer}
-            wishlistIds={wishlistIds}
-            addToCart={addToCart}
-            toggleWishlist={toggleWishlist}
-            isWishlisted={isWishlisted}
-            hideViewAll={true}
+          <AppPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
           />
         </div>
       )}

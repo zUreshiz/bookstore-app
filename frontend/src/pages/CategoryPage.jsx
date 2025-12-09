@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import BookCase from "../components/BookCase";
 import FilterMenu from "../components/FilterMenu";
 import { toast } from "react-toastify";
@@ -7,43 +7,71 @@ import api from "../api/axios";
 import Loading from "../components/Loading";
 import { useWishlist } from "../hooks/useWishlist";
 import { useCart } from "../hooks/useCart";
+import AppPagination from "@/components/AppPagination";
 
 const CategoryPage = () => {
   const { categoryName } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const title = `Category: ${categoryName}`;
   const subtitle = `Showing books for ${categoryName}`;
-  const [bookSale, setBookSale] = useState([]);
+
   const [bookBuffer, setBookBuffer] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { addToCart } = useCart();
 
+  const { addToCart } = useCart();
   const { wishlistIds, wishlistLoading, toggleWishlist, isWishlisted } = useWishlist();
 
-  const fetchBooks = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [allBooksRes, saleBookRes] = await Promise.all([
-        api.get(`/books?category=${categoryName}`),
-        api.get("/books/sale"),
-      ]);
-      setBookBuffer(allBooksRes.data || []);
-      setBookSale(saleBookRes.data || []);
-    } catch (error) {
-      console.log("Error data: ", error);
-      toast.error("Error tasks data");
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryName]);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+  // Fetch books
+  const fetchBooks = useCallback(
+    async (page = 1) => {
+      try {
+        setLoading(true);
 
-  const filteredBooks = useMemo(
-    () => bookBuffer.filter((book) => book.category === categoryName),
-    [categoryName, bookBuffer]
+        const res = await api.get(
+          `/books?category=${categoryName}&page=${page}&limit=12`
+        );
+
+        setBookBuffer(res.data.data || []);
+        setCurrentPage(res.data.pagination.currentPage);
+        setTotalPages(res.data.pagination.totalPages);
+      } catch (error) {
+        console.log("Error data: ", error);
+        toast.error("Error tasks data");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [categoryName]
   );
+
+  // Disable browser scroll restore
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
+  // Scroll on first load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Sync page + fetch when page changes
+  useEffect(() => {
+    setSearchParams({ page: currentPage }, { replace: true });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    fetchBooks(currentPage);
+  }, [currentPage, fetchBooks]);
 
   if (loading || wishlistLoading) {
     return (
@@ -54,18 +82,28 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="flex">
-      <FilterMenu />
-      <BookCase
-        title={title}
-        books={bookBuffer}
-        wishlistIds={wishlistIds}
-        addToCart={addToCart}
-        categoryName={categoryName}
-        toggleWishlist={toggleWishlist}
-        isWishlisted={isWishlisted}
-        subtitle={subtitle}
-        hideViewAll={true}
+    <div>
+      <div className="flex">
+        <FilterMenu />
+
+        <BookCase
+          title={title}
+          books={bookBuffer}
+          wishlistIds={wishlistIds}
+          addToCart={addToCart}
+          categoryName={categoryName}
+          toggleWishlist={toggleWishlist}
+          isWishlisted={isWishlisted}
+          subtitle={subtitle}
+          hideViewAll={true}
+        />
+      </div>
+
+      {/* Pagination */}
+      <AppPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
       />
     </div>
   );

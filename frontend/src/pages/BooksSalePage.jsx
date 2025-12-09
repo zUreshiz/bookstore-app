@@ -5,6 +5,8 @@ import BookCase from "../components/BookCase";
 import Loading from "../components/Loading.jsx";
 import { useWishlist } from "../hooks/useWishlist";
 import { useCart } from "../hooks/useCart.js";
+import AppPagination from "@/components/AppPagination";
+import { useSearchParams } from "react-router-dom";
 
 const BooksSalePage = () => {
   const [bookSale, setBookSale] = useState([]);
@@ -12,11 +14,18 @@ const BooksSalePage = () => {
   const { addToCart } = useCart();
   const { wishlistIds, wishlistLoading, toggleWishlist, isWishlisted } = useWishlist();
 
-  const fetchBookSale = async () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchBookSale = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await api.get("/books/sale");
-      setBookSale(res.data);
+      const res = await api.get(`/books/sale?page=${page}&limit=12`);
+      setBookSale(res.data.data || []);
+      setCurrentPage(res.data.pagination.currentPage);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
       console.log("Error data: ", error);
       toast.error("Error data");
@@ -25,9 +34,22 @@ const BooksSalePage = () => {
     }
   };
 
+  // Scroll top on first load
   useEffect(() => {
-    fetchBookSale();
+    window.scrollTo(0, 0);
   }, []);
+
+  // Sync page + fetch
+  useEffect(() => {
+    setSearchParams({ page: currentPage }, { replace: true });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    fetchBookSale(currentPage);
+  }, [currentPage]);
 
   return (
     <div>
@@ -36,15 +58,22 @@ const BooksSalePage = () => {
           <Loading />
         </div>
       ) : (
-        <BookCase
-          title={"Sale Page"}
-          books={bookSale}
-          wishlistIds={wishlistIds}
-          addToCart={addToCart}
-          toggleWishlist={toggleWishlist}
-          isWishlisted={isWishlisted}
-          hideViewAll={true}
-        />
+        <>
+          <BookCase
+            title={"Sale Page"}
+            books={bookSale}
+            wishlistIds={wishlistIds}
+            addToCart={addToCart}
+            toggleWishlist={toggleWishlist}
+            isWishlisted={isWishlisted}
+            hideViewAll={true}
+          />
+          <AppPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
     </div>
   );

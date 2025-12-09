@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import api from "../api/axios";
 import Loading from "../components/Loading";
 import { useCart } from "../hooks/useCart";
@@ -7,6 +7,7 @@ import { useWishlist } from "../hooks/useWishlist";
 import FilterMenu from "../components/FilterMenu";
 import BookCase from "../components/BookCase";
 import { FaHeartBroken } from "react-icons/fa";
+import AppPagination from "@/components/AppPagination";
 
 const WishlistPage = () => {
   const [books, setBooks] = useState([]);
@@ -15,21 +16,42 @@ const WishlistPage = () => {
   const { addToCart } = useCart();
   const { wishlistIds, wishlistLoading, toggleWishlist, isWishlisted } = useWishlist();
 
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get("/wishlist");
-        setBooks(res.data || []);
-      } catch (error) {
-        console.error("Error fetching wishlist:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [searchParams, setSearchParams] = useSearchParams();
 
-    fetchWishlist();
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchWishlist = async (page = 1) => {
+    try {
+      setLoading(true);
+
+      const res = await api.get(`/wishlist?page=${page}&limit=12`);
+
+      setBooks(res.data.data || []);
+      setCurrentPage(res.data.pagination.currentPage);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, []);
+
+  // Sync page + fetch
+  useEffect(() => {
+    setSearchParams({ page: currentPage }, { replace: true });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    fetchWishlist(currentPage);
+  }, [currentPage]);
 
   /** LOADING */
   if (loading || wishlistLoading) {
@@ -73,6 +95,12 @@ const WishlistPage = () => {
         toggleWishlist={toggleWishlist}
         isWishlisted={isWishlisted}
         hideViewAll={true}
+      />
+
+      <AppPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
       />
     </div>
   );
